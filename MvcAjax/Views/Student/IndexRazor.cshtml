@@ -1,0 +1,229 @@
+﻿@model List<MvcAjax.Models.StudentModel>
+
+@{
+    ViewBag.Title = "IndexRazor";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<div class="col-md-12 mt-4">
+        <button class="btn btn-primary" id="addStudent">Add Student</button>
+    <hr>
+    <table id="tblStudent" class="table table-bordered table-striped table-responsive table-hover">
+        <thead>
+            <tr>
+                <th align="left" class="productth">ID</th>
+                <th align="left" class="productth">Student Name</th>
+                <th align="left" class="productth">Student LastName</th>
+                <th align="left" class="productth">Student Code</th>
+                <th align="left" class="productth">Student Address</th>
+                <th align="left" class="productth">Edit</th>
+                <th align="left" class="productth">Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td align="left" class="productth">@item.ID</td>
+                    <td align="left" class="productth">@item.Name</td>
+                    <td align="left" class="productth">@item.LastName</td>
+                    <td align="left" class="productth">@item.Code</td>
+                    <td align="left" class="productth">@item.Address</td>
+                    <th align="left" class="productth"><a class="nav-link btn edit" unique="@item.ID">Edit</a> </th>
+                    <th align="left" class="productth"><a class="nav-link btn remove" unique="@item.ID">Delete</a></th>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div id="popupAdd" style="display: none;">
+
+    <div class="form-group col-md-12">
+        <label for="">Student Name</label>
+        <input type="text" name="StudentName" id="StudentName" class="form-control" placeholder="Enter Student Name" required>
+    </div>
+    <div class="form-group col-md-12">
+        <label for="">Student LastName</label>
+        <input type="text" name="StudentLastName" id="StudentLastName" class="form-control" placeholder="Enter Student LastName" required>
+    </div>
+    <div class="form-group col-md-12">
+        <label for="">Student Code</label>
+        <input type="text" name="StudentCode" id="StudentCode" class="form-control" placeholder="Enter Student Code" required>
+    </div>
+    <div class="form-group col-md-12">
+        <label for="">Student Address</label>
+        <input type="text" name="StudentAddress" id="StudentAddress" class="form-control" placeholder="Enter Student Name" required>
+    </div>
+    <div class="form-group col-md-12">
+        <div  display:inline-block;">
+            <input class="btn btn-primary" id="btnSave" name="submitButton" value="Save" type="button">
+        </div>
+    </div> 
+
+</div>
+
+
+<div id="popupEdit" style="display: none;" >
+
+    <div class="form-group col-md-12">
+        <label for="">Student Name</label>
+        <input type="text" name="StudentNameEdit" id="StudentNameEdit" class="form-control" placeholder="Enter Student Name" required>
+    </div>
+    <div class="form-group col-md-12">
+        <label for="">Student LastName</label>
+        <input type="text" name="StudentLastNameEdit" id="StudentLastNameEdit" class="form-control" placeholder="Enter Student LastName" required>
+    </div>
+    <div class="form-group col-md-12">
+        <label for="">Student Code</label>
+        <input type="text" name="StudentCodeEdit" id="StudentCodeEdit" class="form-control" placeholder="Enter Student Code" required>
+    </div>
+    <div class="form-group col-md-12">
+        <label for="">Student Address</label>
+        <input type="text" name="StudentAddressEdit" id="StudentAddressEdit" class="form-control" placeholder="Enter Student Name" required>
+    </div>
+    <div class="form-group col-md-12">
+        <div display:inline-block;">
+            <input class="btn btn-primary" id="btnUpdate" name="submitButton" value="Update" type="button">
+        </div>
+    </div>
+
+</div>
+
+<div id="popup" style="display: none;">
+    
+    <h3 class="text-center">Are you sure to delete this student?</h3>
+     
+</div>
+
+
+
+@section Scripts
+{
+    <script src="~/Scripts/jquery-ui-1.12.1.js"></script>
+    <script src="~/Scripts/jquery-ui-1.12.1.min.js"></script>
+
+    <script type="text/javascript"> 
+         
+        $(function () {
+
+        $("#addStudent").click(function () {
+
+            $("#popupAdd").dialog({
+                title: "Add Form",
+                width: 430,
+                height: 450,
+                modal: true,
+                buttons: {
+                    Close: function () { 
+                        $(this).dialog('close')
+                    }
+                }
+            });
+        });
+
+        $(".edit").click(function () {
+
+            $("#popupEdit").dialog({
+                title: "Edit Form",
+                width: 430,
+                height: 450,
+                modal: true,
+                buttons: {
+                    Close: function () { 
+                        $(this).dialog('close')
+                    }
+                }
+            });
+        });
+
+
+        $(".remove").click(function () {
+            var idStudent = parseInt($(this).attr("unique"));
+
+            $("#popup").dialog({
+                title: "Basic dialog",
+                width: 430,
+                height: 200,
+                modal: true,
+                buttons: {
+                    Delete: function () {
+                        $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("deleteStudent")',
+                        data: JSON.stringify({ id: idStudent}),
+                        dataType: "json",
+                        contentType: 'application/json; charset=utf-8',
+                        success: function() {
+                            LoadData();
+                        },
+                        error: function() {
+                            alert("Error while deleting data")
+                            }
+                        });
+                        $(this).dialog('close')
+                    }
+                }
+            });
+        });
+
+
+        //LoadData();
+        $("#btnSave").click(function() {
+            var std = {};
+            std.studentName = $("#StudentName").val();
+            std.studentLastName = $("#StudentLastName").val();
+            std.studentCode = parseInt($("#StudentCode").val());
+            std.studentAddress = $("#StudentAddress").val();
+            $.ajax({
+                type: "POST",
+                url: '@Url.Action("createStudent")',
+                data: '{std: ' +JSON.stringify(std) +'}',
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function() {
+                    LoadData();
+                },
+                error: function() {
+                    alert("Error while inserting data")
+                }
+            });
+            return false;
+        });
+    });
+
+    function LoadData() {
+        $("#tblStudent tbody tr").remove();
+        $.ajax({
+            type: 'POST',
+            url: '@Url.Action("getStudent")',
+            dataType: 'json',
+            data: {id: ''},
+            success: function(data) {
+                var items = '';
+                $.each(data, function(i, item) {
+                    var rows = "<tr>"
+                    + "<td class='producttd'> " + item.studentID +"</td>"
+                    + "<td class='producttd'> " + item.studentName +"</td>"
+                    + "<td class='producttd'> " + item.studentLastName +"</td>"
+                    + "<td class='producttd'> " + item.studentCode +"</td>"
+                    + "<td class='producttd'> " + item.studentAddress +"</td>"
+                    + "<td class='producttd'><a class='nav-link btn edit' unique='"+item.studentID+"'> Edit </a> </td>"
+                    + "<td class='producttd'><a class='nav-link btn remove' unique='"+item.studentID+"'> Delete  </a></td>"
+                    + "</tr>";
+                    $('#tblStudent tbody').append(rows);
+                });
+            },
+            error: function (ex) {
+                var r = jQuery.parseJSON(response.responseText);
+                alert("Message: "+ r.Message);
+                alert("StrackTrace: "+ r.StrackTrace);
+                alert("ExceptionType: "+ r.ExceptionType);
+            }
+        });
+        return false;
+    }
+    </script>
+}
+
